@@ -8,7 +8,6 @@ Angular 5 library that allow you to build drag and drop without the native HTML5
 Start by importing DragDropModule module
 
 ```ts
-// app.module.ts
 import { NgxDragAndDropModule } from 'ngx-drag-and-drop';
 
 @NgModule({
@@ -22,7 +21,6 @@ export class ExampleModule { }
 
 Add the 'drag-and-drop-wrapper', 'draggable' and 'dropzone' directives
 ```html
-// app.component.html
 <div class="container" drag-and-drop-wrapper>
 
   <div class="drag" draggable="card">
