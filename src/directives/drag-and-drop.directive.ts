@@ -1,5 +1,15 @@
-import { Directive, ElementRef, Input, HostListener, EventEmitter, Output, OnInit, OnDestroy } from "@angular/core";
-import { myDoc } from "./DragDropUtils";
+// import { Directive } from '@angular/core';
+
+// @Directive({
+//     selector: '[dndDragAndDrop]'
+// })
+// export class DragAndDropDirective {
+//     constructor() {}
+// }
+
+
+import { Directive, ElementRef, Input, HostListener, EventEmitter, Output, OnInit, OnDestroy } from '@angular/core';
+import { myDoc } from './drag-and-drop.utils';
 
 /* Polyfill TouchEvent */
 export interface MyTouchEvent extends TouchEvent {}
@@ -17,16 +27,16 @@ interface ShadowRoot extends DocumentFragment {
 interface ElementWithShadowRoot extends HTMLElement {
     shadowRoot  : ShadowRoot;
 };*/
-const dragPointerId = "dragPointer";
+const dragPointerId = 'dragPointer';
 type Pointer = {x: number, y: number};
 class DragManager {
     draggingPointer     = new Map<string, Pointer>();
-    draggedStructures   = new Map<string, AlxDraggable | DragEvent>();
-    dropZones           = new Map<Element, AlxDropzone >();
+    draggedStructures   = new Map<string, Draggable | DragEvent>();
+    dropZones           = new Map<Element, Dropzone >();
     //constructor() {}
-    preStartDrag( idPointer: string, dragged: AlxDraggable, x: number, y: number
+    preStartDrag( idPointer: string, dragged: Draggable, x: number, y: number
                 , delay: number, dist: number) : Promise<any> {
-        // console.log("preStartDrag", idPointer, dragged, x, y, delay);
+        // console.log('preStartDrag', idPointer, dragged, x, y, delay);
         this.draggingPointer  .set(idPointer, {x: x, y: y});
         return new Promise<void>( (resolve, reject) => {
             setTimeout(() => {
@@ -37,10 +47,10 @@ class DragManager {
             }, Math.max(0, delay));
         }); // End of Promise
     }
-    public startDrag(idPointer: string, dragged: AlxDraggable | DragEvent, x: number, y: number) : Map<Element, AlxDropzone> {
-        // console.log("startdrag", dragged, x, y);
+    public startDrag(idPointer: string, dragged: Draggable | DragEvent, x: number, y: number) : Map<Element, Dropzone> {
+        // console.log('startdrag', dragged, x, y);
         this.draggedStructures.set(idPointer, dragged);
-        let possibleDropZones = new Map<Element, AlxDropzone>();
+        let possibleDropZones = new Map<Element, Dropzone>();
         this.dropZones.forEach( dz => {
             if( dz.checkAccept(dragged) ) {
                 dz.appendDropCandidatePointer( idPointer );
@@ -52,17 +62,17 @@ class DragManager {
     public isAssociatedToDropZone(element: Element) : boolean {
         return this.dropZones.has( element );
     }
-    public registerDropZone( dropzone: AlxDropzone ) {
+    public registerDropZone( dropzone: Dropzone ) {
         this.dropZones.set(dropzone.root, dropzone);
     }
-    public unregisterDropZone( dropzone: AlxDropzone ) {
+    public unregisterDropZone( dropzone: Dropzone ) {
         this.dropZones.delete(dropzone.root);
     }
     public pointerMove(idPointer: string, x: number, y: number) : boolean {
         let ptr = this.draggingPointer.get(idPointer);
         if(ptr) {ptr.x = x; ptr.y = y;}
         let dragged = this.draggedStructures.get(idPointer);
-        if(dragged && dragged instanceof AlxDraggable) {
+        if(dragged && dragged instanceof Draggable) {
             dragged.move(x, y);
         }
         return dragged !== undefined;
@@ -70,7 +80,7 @@ class DragManager {
     public pointerRelease(idPointer: string) : boolean {
         let dragged = this.draggedStructures.get(idPointer);
         if(dragged) {
-            if(dragged instanceof AlxDraggable) {
+            if(dragged instanceof Draggable) {
                 dragged.stop();
             }
         }
@@ -82,16 +92,17 @@ class DragManager {
 let DM = new DragManager();
 
 let dragDropInit = false;
+
+
 @Directive({
-    selector: "*[alx-dragdrop]"
+    selector: '*[drag-and-drop-wrapper]'
 })
-export class AlxDragDrop {
+export class DragDrop {
     nbDragEnter = 0;
     constructor() {
         if(dragDropInit) {
-            console.error( "Do not create multiple instance of directive alx-dragdrop !" );
+            console.error( 'Do not create multiple instance of directive drag-and-drop-wrapper !' );
         } else {
-            console.log( "AlxDragDrop enabled !");
             dragDropInit = true;
         }
     }
@@ -102,42 +113,42 @@ export class AlxDragDrop {
             dz.removeDropCandidatePointer   (dragPointerId);
         });
     }
-    @HostListener( "document: drop", ["$event"] ) drop( e ) {
-        // console.log( "document drop", e );
+    @HostListener( 'document: drop', ['$event'] ) drop( e ) {
+        // console.log( 'document drop', e );
         e.preventDefault();
         e.stopPropagation();
         this.removeFeedbackForDragPointer();
     }
-    @HostListener( "document: dragover", ["$event"] ) dragover( e ) {
-        // console.log( "document dragover", e );
+    @HostListener( 'document: dragover', ['$event'] ) dragover( e ) {
+        // console.log( 'document dragover', e );
         e.preventDefault();
         e.stopPropagation();
     }
-    @HostListener( "document: dragenter", ["$event"] ) dragenter( e ) {
+    @HostListener( 'document: dragenter', ['$event'] ) dragenter( e ) {
         this.nbDragEnter++;
         if(this.nbDragEnter === 1) {
             DM.startDrag(dragPointerId, e, -1, -1);
         }
     }
-    @HostListener( "document: dragleave", ["$event"] ) dragleave( e ) {
+    @HostListener( 'document: dragleave', ['$event'] ) dragleave( e ) {
         this.nbDragEnter--;
         if(this.nbDragEnter === 0) {
             this.removeFeedbackForDragPointer();
             DM.pointerRelease( dragPointerId );
         }
     }
-    @HostListener( "document: dragend", ["$event"] ) dragend( e ) {
+    @HostListener( 'document: dragend', ['$event'] ) dragend( e ) {
         DM.pointerRelease( dragPointerId );
         this.removeFeedbackForDragPointer();
         e.preventDefault();
     }
-    @HostListener( "document: mousemove", ["$event"] ) mousemove( e ) {
-        DM.pointerMove   ("mouse", e.clientX, e.clientY);
+    @HostListener( 'document: mousemove', ['$event'] ) mousemove( e ) {
+        DM.pointerMove   ('mouse', e.clientX, e.clientY);
     }
-    @HostListener( "document: mouseup"  , ["$event"] ) mouseup  ( e ) {
-        DM.pointerRelease("mouse");
+    @HostListener( 'document: mouseup'  , ['$event'] ) mouseup  ( e ) {
+        DM.pointerRelease('mouse');
     }
-    @HostListener( "document: touchmove", ["$event"] ) touchmove( e ) {
+    @HostListener( 'document: touchmove', ['$event'] ) touchmove( e ) {
         for (let i = 0; i < e.changedTouches.length; i++) {
             let touch:Touch = e.changedTouches.item(i);
             if (DM.pointerMove(touch.identifier.toString(), touch.clientX, touch.clientY)) {
@@ -146,7 +157,7 @@ export class AlxDragDrop {
             }
         }
     }
-    @HostListener( "document: touchend" , ["$event"] ) touchend ( e ) {
+    @HostListener( 'document: touchend' , ['$event'] ) touchend ( e ) {
         for(let i=0; i<e.changedTouches.length; i++) {
             let touch : Touch = e.changedTouches.item(i);
             if( DM.pointerRelease(touch.identifier.toString()) ) {
@@ -168,18 +179,18 @@ let offsetElement = (element: HTMLElement) : {left: number, top: number} => {
 };
 
 @Directive({
-    selector: "*[alx-draggable]"
+    selector: '*[draggable]'
 })
-export class AlxDraggable implements OnInit, OnDestroy {
-    @Input ("alx-draggable" ) draggedData : any;
-    @Input ("alx-start-delay") startDelay : number;
-    @Input ("alx-start-distance") startDistance: number;
-    @Output("alx-drag-start") onDragStart = new EventEmitter<any>();
-    @Output("alx-drag-end"  ) onDragEnd   = new EventEmitter<any>();
+export class Draggable implements OnInit, OnDestroy {
+    @Input ('draggable' ) draggedData : any;
+    @Input ('drag-start-delay') startDelay : number;
+    @Input ('start-distance') startDistance: number;
+    @Output('drag-start') onDragStart = new EventEmitter<any>();
+    @Output('drag-end'  ) onDragEnd   = new EventEmitter<any>();
     private isBeingDragged                : boolean = false;
     private cloneNode                     : HTMLElement = null;
-    private currentDropZone               : AlxDropzone;
-    private possibleDropZones = new Map<Element, AlxDropzone>();
+    private currentDropZone               : Dropzone;
+    private possibleDropZones = new Map<Element, Dropzone>();
     private dx : number;
     private dy : number;
     private ox : number;
@@ -191,9 +202,9 @@ export class AlxDraggable implements OnInit, OnDestroy {
     constructor(el: ElementRef) {
         this.root = el.nativeElement;
         if(!dragDropInit) {
-           console.error("You should add one alx-dragdrop attribute to your code before using alx-draggable");
+           console.error('You should add one dragdrop attribute to your code before using draggable');
         }
-        //console.log( "new instance of AlxDraggable", this );
+        //console.log( 'new instance of Draggable', this );
     }
     ngOnInit() {
         //
@@ -201,14 +212,14 @@ export class AlxDraggable implements OnInit, OnDestroy {
     ngOnDestroy() {
         // XXX No stop in case of unplug while dragging... : // this.stop();
     }
-    @HostListener("mousedown" , ["$event"]) onMouseDown (event : MouseEvent) {
-        //console.log("mousedown on", this, event);
+    @HostListener('mousedown' , ['$event']) onMouseDown (event : MouseEvent) {
+        //console.log('mousedown on', this, event);
         event.preventDefault();
         event.stopPropagation();
-        this.prestart("mouse", event.clientX, event.clientY);
+        this.prestart('mouse', event.clientX, event.clientY);
     }
-    @HostListener("touchstart", ["$event"]) onTouchStart(event: MyTouchEvent) {
-        //console.log("touchstart on", this);
+    @HostListener('touchstart', ['$event']) onTouchStart(event: MyTouchEvent) {
+        //console.log('touchstart on', this);
         // event.preventDefault();
         event.stopPropagation();
         for(let i=0; i<event.changedTouches.length; i++) {
@@ -222,7 +233,7 @@ export class AlxDraggable implements OnInit, OnDestroy {
                 this.start(idPointer, x, y);
             },
             () => {
-                // console.error("skip the drag");
+                // console.error('skip the drag');
             }
             );
     }
@@ -235,18 +246,18 @@ export class AlxDraggable implements OnInit, OnDestroy {
             this.ox = x; this.oy = y;
             this.dx = x - offset.left; // Math.round(bbox.left + window.pageXOffset);
             this.dy = y - offset.top ; // Math.round(bbox.top  + window.pageYOffset);
-            /*let D = document.querySelector("#debug");
-            D.innerHTML = window.pageXOffset + " ; " + window.pageYOffset + "<br/>"
-                        + window.scrollX + " ; " + window.scrollY + "<br/>"
-                        + this.root.offsetLeft + " ; " + this.root.offsetTop + "<br/>"
-                        // + bbox.left + " ; " + bbox.top
+            /*let D = document.querySelector('#debug');
+            D.innerHTML = window.pageXOffset + ' ; ' + window.pageYOffset + '<br/>'
+                        + window.scrollX + ' ; ' + window.scrollY + '<br/>'
+                        + this.root.offsetLeft + ' ; ' + this.root.offsetTop + '<br/>'
+                        // + bbox.left + ' ; ' + bbox.top
                         ;*/
             this.tx = this.root.offsetWidth ; // bbox.width ;
             this.ty = this.root.offsetHeight; // bbox.height;
 
             this.getClone();
-            this.cloneNode.style.left = (x - this.dx /* + window.pageXOffset */) + "px";
-            this.cloneNode.style.top  = (y - this.dy /* + window.pageYOffset */) + "px";
+            this.cloneNode.style.left = (x - this.dx /* + window.pageXOffset */) + 'px';
+            this.cloneNode.style.top  = (y - this.dy /* + window.pageYOffset */) + 'px';
             this.onDragStart.emit( this.draggedData );
             this.possibleDropZones = DM.startDrag(idPointer, this, x, y);
         }
@@ -272,14 +283,14 @@ export class AlxDraggable implements OnInit, OnDestroy {
             this.getClone();
         }
         if(this.cloneNode) {
-            this.cloneNode.style.left = (x - this.dx /* + window.pageXOffset */) + "px";
-            this.cloneNode.style.top  = (y - this.dy /* + window.pageYOffset */) + "px";
+            this.cloneNode.style.left = (x - this.dx /* + window.pageXOffset */) + 'px';
+            this.cloneNode.style.top  = (y - this.dy /* + window.pageYOffset */) + 'px';
             // let parent = this.cloneNode.parentElement;
             let visibility = this.cloneNode.style.visibility;
             // parent.removeChild( this.cloneNode );
-            this.cloneNode.style.visibility = "hidden";
+            this.cloneNode.style.visibility = 'hidden';
             let top = this.cloneNode.style.top;
-            this.cloneNode.style.top = "999999999px";
+            this.cloneNode.style.top = '999999999px';
 
             // let L = <Array<Element>>myDoc.elementsFromPoint(x-window.pageXOffset, y-window.pageYOffset);
             element = myDoc.elementFromPoint(x, y);
@@ -344,45 +355,45 @@ export class AlxDraggable implements OnInit, OnDestroy {
 
             // Insert the clone on the DOM
             document.body.appendChild( this.cloneNode );
-            this.cloneNode.style.position        = "absolute";
-            this.cloneNode.style.zIndex          = "999";
-            this.cloneNode.style.marginLeft      = "0";
-            this.cloneNode.style.marginTop       = "0";
-            this.cloneNode.style.marginRight     = "0";
-            this.cloneNode.style.marginBottom    = "0";
-            this.cloneNode.style.opacity         = "";
-            this.cloneNode.style.cursor          = "";
-            this.cloneNode.style.transform       = "";
-            this.cloneNode.style.transformOrigin = "";
-            this.cloneNode.style.animation       = "";
-            this.cloneNode.style.transition      = "";
-            this.cloneNode.classList.add( "alx-cloneNode" );
+            this.cloneNode.style.position        = 'absolute';
+            this.cloneNode.style.zIndex          = '999';
+            this.cloneNode.style.marginLeft      = '0';
+            this.cloneNode.style.marginTop       = '0';
+            this.cloneNode.style.marginRight     = '0';
+            this.cloneNode.style.marginBottom    = '0';
+            this.cloneNode.style.opacity         = '';
+            this.cloneNode.style.cursor          = '';
+            this.cloneNode.style.transform       = '';
+            this.cloneNode.style.transformOrigin = '';
+            this.cloneNode.style.animation       = '';
+            this.cloneNode.style.transition      = '';
+            this.cloneNode.classList.add( 'drag-and-drop-clone-node' );
             // console.log( this.cloneNode.style );
         }
         return this.cloneNode;
     }
 }
 
-@Directive({ selector: "*[alx-dropzone]" })
-export class AlxDropzone implements OnInit, OnDestroy {
+@Directive({ selector: '*[dropzone]' })
+export class Dropzone implements OnInit, OnDestroy {
     nbDragEnter = 0;
     public root : HTMLElement;
-    @Input("alx-drag-css"     ) dragCSS     : string;
-    @Input("alx-drag-over-css") dragOverCSS : string;
-    @Input("alx-drag-over-css-for-draggable") dragOverCSS_pointer : string;
-    @Input("alx-accept-function") acceptFunction : (data: any) => boolean;
-    @Output("alx-ondrop")     onDropEmitter = new EventEmitter<any>();
-    @Output("alx-drag-start") onDragStart   = new EventEmitter<any>();
-    @Output("alx-drag-end")   onDragEnd     = new EventEmitter<any>();
-    @Output("alx-drag-enter") onDragEnter   = new EventEmitter<any>();
-    @Output("alx-drag-leave") onDragLeave   = new EventEmitter<any>();
+    @Input('drag-css'     ) dragCSS     : string;
+    @Input('drag-over-css') dragOverCSS : string;
+    @Input('drag-over-css-for-draggable') dragOverCSS_pointer : string;
+    @Input('accept-function') acceptFunction : (data: any) => boolean;
+    @Output('ondrop')     onDropEmitter = new EventEmitter<any>();
+    @Output('drag-start') onDragStart   = new EventEmitter<any>();
+    @Output('drag-end')   onDragEnd     = new EventEmitter<any>();
+    @Output('drag-enter') onDragEnter   = new EventEmitter<any>();
+    @Output('drag-leave') onDragLeave   = new EventEmitter<any>();
 
     // CSS when canDrop and startdraggable
     private dropCandidateofPointers : Array<string> = [];
     private pointersHover           : Array<string> = [];
     constructor(el: ElementRef) {
         if(!dragDropInit) {
-            console.error("You should add one alx-dragdrop attribute to your code before using alx-dropzone");
+            console.error('You should add one dragdrop attribute to your code before using dropzone');
         }
         this.root = el.nativeElement;
         // this.acceptFct = YES;
@@ -392,36 +403,36 @@ export class AlxDropzone implements OnInit, OnDestroy {
         //
     }
     ngOnDestroy() {
-        // console.log( "TODO: Should implement dropzone destoy");
+        // console.log( 'TODO: Should implement dropzone destoy');
         DM.unregisterDropZone( this );
     }
-    @HostListener("dragenter" , ["$event"]) BrowserDragEnter (event : MouseEvent) {
-        // console.log( "BrowserDragEnter", this, event );
+    @HostListener('dragenter' , ['$event']) BrowserDragEnter (event : MouseEvent) {
+        // console.log( 'BrowserDragEnter', this, event );
         this.nbDragEnter++;
         if(this.nbDragEnter === 1) {
             this.appendPointerHover(dragPointerId);
         }
     }
-    @HostListener("dragleave" , ["$event"]) BrowserDragLeave (event : MouseEvent) {
-        // console.log( "BrowserDragEnter", this, event );
+    @HostListener('dragleave' , ['$event']) BrowserDragLeave (event : MouseEvent) {
+        // console.log( 'BrowserDragEnter', this, event );
         this.nbDragEnter--;
         if(this.nbDragEnter === 0) {
             this.removePointerHover(dragPointerId);
         }
     }
-    @HostListener("drop" , ["$event"]) BrowserDrop (event : MouseEvent) {
-        // console.log( "BrowserDrop", this, event );
+    @HostListener('drop' , ['$event']) BrowserDrop (event : MouseEvent) {
+        // console.log( 'BrowserDrop', this, event );
         DM.pointerRelease( dragPointerId );
         this.nbDragEnter = 0;
         this.onDropEmitter.emit( event );
     }
     drop( obj ) {
-        // console.log( this, "drop", obj );
+        // console.log( this, 'drop', obj );
         this.onDropEmitter.emit( obj );
     }
-    checkAccept(drag: AlxDraggable | DragEvent) : boolean {
+    checkAccept(drag: Draggable | DragEvent) : boolean {
         let res: boolean;
-        if( drag instanceof AlxDraggable ) {
+        if( drag instanceof Draggable ) {
             res = this.acceptFunction?this.acceptFunction( drag.draggedData ):true;
         } else {
             res = this.acceptFunction?this.acceptFunction( drag ):true;
@@ -435,7 +446,7 @@ export class AlxDropzone implements OnInit, OnDestroy {
         if( this.pointersHover.indexOf(idPointer) === -1 ) {
             let dragged = DM.draggedStructures.get(idPointer);
             this.pointersHover.push(idPointer);
-            if(dragged instanceof AlxDraggable) {
+            if(dragged instanceof Draggable) {
                 if(this.dragOverCSS_pointer) {
                     dragged.getClone().classList.add( this.dragOverCSS_pointer );
                 }
@@ -453,7 +464,7 @@ export class AlxDropzone implements OnInit, OnDestroy {
         if( pos >= 0 ) {
             let dragged = DM.draggedStructures.get(idPointer);
             this.pointersHover.splice(pos, 1);
-            if(dragged instanceof AlxDraggable) {
+            if(dragged instanceof Draggable) {
                 if(this.dragOverCSS_pointer) {
                     dragged.getClone().classList.remove( this.dragOverCSS_pointer );
                 }
@@ -467,10 +478,10 @@ export class AlxDropzone implements OnInit, OnDestroy {
         }
     }
     appendDropCandidatePointer( idPointer: string ) {
-        // console.log( "appendDropCandidatePointer", idPointer, this );
+        // console.log( 'appendDropCandidatePointer', idPointer, this );
         if( this.dropCandidateofPointers.indexOf(idPointer) === -1 ) {
             let dragged = DM.draggedStructures.get(idPointer);
-            if(dragged instanceof AlxDraggable) {
+            if(dragged instanceof Draggable) {
                 this.onDragStart.emit( dragged.draggedData );
             } else {
                 this.onDragStart.emit( dragged );
@@ -485,7 +496,7 @@ export class AlxDropzone implements OnInit, OnDestroy {
         let pos = this.dropCandidateofPointers.indexOf(idPointer);
         if( pos >= 0 ) {
             let dragged = DM.draggedStructures.get(idPointer);
-            if(dragged instanceof AlxDraggable) {
+            if(dragged instanceof Draggable) {
                 this.onDragEnd.emit( dragged.draggedData );
             } else {
                 this.onDragEnd.emit( dragged );

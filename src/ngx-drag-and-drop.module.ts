@@ -1,18 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
-import { AlxDraggable, AlxDropzone, AlxDragDrop }  from "./directives/DragDrop";
+import { Draggable, Dropzone, DragDrop }  from './directives/drag-and-drop.directive';
 
 @NgModule({
     declarations: [
-        AlxDragDrop,
-        AlxDraggable,
-        AlxDropzone,
+        DragDrop,
+        Draggable,
+        Dropzone,
     ],
     exports: [
-        AlxDragDrop,
-        AlxDraggable,
-        AlxDropzone,
+        DragDrop,
+        Draggable,
+        Dropzone,
     ],
     imports: [
         CommonModule

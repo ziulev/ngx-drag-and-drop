@@ -1,0 +1,25 @@
+
+
+
+
+
+
+
+
+<div class="row" drag-and-drop-wrapper>
+
+  <div class="card" draggable="'card'" drag-start-delay="0">
+    <div class="wrapper">
+      <div class="data">
+        <div class="content">
+          <h1 class="title">Drag me</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="drop-zone" drag-css="dragged" alx-drag-over-css="can-drop" dropzone (ondrop)="onDropComplete($event)">
+    Drop zone
+  </div>
+
+</div>
