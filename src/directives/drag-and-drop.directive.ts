@@ -228,7 +228,7 @@ export class Draggable implements OnInit, OnDestroy {
         }
     }
     prestart(idPointer: string, x: number, y: number) {
-        DM.preStartDrag(idPointer, this, x, y, this.startDelay || 100, this.startDistance || 10).then(
+        DM.preStartDrag(idPointer, this, x, y, this.startDelay || 0, this.startDistance || 10).then(
             () => {
                 this.start(idPointer, x, y);
             },

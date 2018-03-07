@@ -1,6 +1,6 @@
 {
   "name": "ngx-drag-and-drop",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Ngx Drag And Drop, an Angular library",
   "main": "./bundles/ngx-drag-and-drop.umd.js",
   "scripts": {
