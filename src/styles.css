@@ -1,0 +1,8 @@
+body {
+    margin: 30px;
+    background-color: #00a5f7;
+}
+
+.drag-el.drag-and-drop-clone-node {
+    cursor: -webkit-grabbing !important;
+}
