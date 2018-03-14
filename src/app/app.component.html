@@ -1,0 +1,36 @@
+<div class="container" drag-and-drop-wrapper>
+
+  <div class="title">
+      <a href="https://github.com/jet8a/ngx-drag-and-drop">ngx drag and drop</a>
+      <div class="buttons">
+          <iframe src="https://ghbtns.com/github-btn.html?user=jet8a&repo=ngx-drag-and-drop&type=star&count=true" frameborder="0" scrolling="0" width="170px" height="20px"></iframe>
+      </div>
+  </div>
+
+  <div class="cards">
+    <div
+      class="drag-el"
+      *ngFor="let card of cards"
+      [draggable]="card"
+    >
+      {{card.title}}
+    </div>
+  </div>
+
+  <div
+    class="cards drop-zone"
+    drag-css="dragged"
+    drag-over-css="can-drop"
+    dropzone
+    (ondrop)="onDropComplete($event)"
+  >
+    <span class="hint" *ngIf="!droppedCards.length">drop zone</span>
+    <div
+      class="drag-el"
+      *ngFor="let card of droppedCards"
+    >
+      {{card.title}}
+    </div>
+  </div>
+
+</div>
