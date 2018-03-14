@@ -13,7 +13,23 @@
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
-  "private": true,
+  "private": false,
+  "keywords": [
+    "ng",
+    "ngx",
+    "ngx-drag-and-drop",
+    "dragging",
+    "dropping",
+    "drag and drop",
+    "drag-drop",
+    "angular",
+    "angular2",
+    "angular 2",
+    "angular4",
+    "angular 4",
+    "angular5",
+    "angular 5"
+  ],
   "dependencies": {
     "@angular/animations": "^5.2.0",
     "@angular/common": "^5.2.0",
