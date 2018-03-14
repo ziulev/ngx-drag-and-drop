@@ -33,3 +33,11 @@ Add the 'drag-and-drop-wrapper', 'draggable' and 'dropzone' directives
 
 </div>
 ```
+
+## How to Contribute
+
+1. [Fork the repo](https://github.com/jet8a/ngx-drag-and-drop/fork)
+2. Create a branch in your repo with a descriptive name
+3. Code your fix
+4. [Create a pull request](https://github.com/jet8a/ngx-drag-and-drop/compare)
+5. Await response from the maintainers!
