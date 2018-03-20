@@ -175,6 +175,7 @@ export class Draggable implements OnInit, OnDestroy {
     @Input ('draggable' ) draggedData : any;
     @Input ('drag-start-delay') startDelay : number;
     @Input ('start-distance') startDistance: number;
+    @Input ('disabled') disabled: boolean = false;
     @Output('drag-start') onDragStart = new EventEmitter<any>();
     @Output('drag-end'  ) onDragEnd   = new EventEmitter<any>();
     private isBeingDragged                : boolean = false;
@@ -204,9 +205,12 @@ export class Draggable implements OnInit, OnDestroy {
     }
     @HostListener('mousedown' , ['$event']) onMouseDown (event : MouseEvent) {
         //console.log('mousedown on', this, event);
-        event.preventDefault();
-        event.stopPropagation();
-        this.prestart('mouse', event.clientX, event.clientY);
+        console.log(this.disabled)
+        if (!this.disabled) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.prestart('mouse', event.clientX, event.clientY);
+        }
     }
     @HostListener('touchstart', ['$event']) onTouchStart(event: MyTouchEvent) {
         //console.log('touchstart on', this);
