@@ -1,6 +1,6 @@
 {
   "name": "ngx-drag-and-drop",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "Angular library that allow you to build drag and drop without the native HTML5 API",
   "license": "MIT",
   "scripts": {
