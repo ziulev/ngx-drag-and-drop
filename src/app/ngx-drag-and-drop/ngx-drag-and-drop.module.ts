@@ -1,7 +1,7 @@
-import { NgModule } from '@angular/core';
+import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { Draggable, Dropzone, DragDrop }  from './ngx-drag-and-drop.directive';
+import { Draggable, Dropzone, DragDrop } from './ngx-drag-and-drop.directive';
 
 @NgModule({
   imports: [
@@ -19,10 +19,10 @@ import { Draggable, Dropzone, DragDrop }  from './ngx-drag-and-drop.directive';
   ]
 })
 export class NgxDragAndDropModule {
-  static forRoot() {
-      return {
-          ngModule: NgxDragAndDropModule,
-          providers: []
-      };
+  static forRoot(): ModuleWithProviders<NgxDragAndDropModule> {
+    return {
+        ngModule: NgxDragAndDropModule,
+        providers: []
+    };
   }
 }

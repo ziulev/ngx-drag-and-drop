@@ -23,13 +23,13 @@ export class ExampleModule { }
 
 Add the 'drag-and-drop-wrapper', 'draggable' and 'dropzone' directives
 ```html
-<div class="container" drag-and-drop-wrapper>
+<div drag-and-drop-wrapper>
 
-  <div class="drag" draggable="card">
+  <div draggable="card">
     Drag me
   </div>
 
-  <div class="drop" dropzone>
+  <div dropzone>
     Drop at me
   </div>
 
@@ -43,3 +43,7 @@ Add the 'drag-and-drop-wrapper', 'draggable' and 'dropzone' directives
 3. Code your fix
 4. [Create a pull request](https://github.com/jet8a/ngx-drag-and-drop/compare)
 5. Await response from the maintainers!
+
+## License
+
+MIT
