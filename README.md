@@ -1,7 +1,7 @@
 # ngx drag and drop
 [![npm version](https://badge.fury.io/js/ngx-drag-and-drop.svg)](https://badge.fury.io/js/ngx-drag-and-drop)
 
-Angular 5 library that allow you to build drag and drop without the native HTML5 API. Mobile touches are supported.
+Angular library that allow you to build drag and drop without the native HTML5 API. Mobile touches are supported.
 
 [Demo](https://jet8a.github.io/ngx-drag-and-drop/)
 
