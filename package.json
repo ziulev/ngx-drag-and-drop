@@ -30,7 +30,7 @@
     "angular5",
     "angular 5"
   ],
-  "dependencies": {
+  "peerDependencies": {
     "@angular/animations": "^9.0.1",
     "@angular/common": "^9.0.1",
     "@angular/compiler": "^9.0.1",
